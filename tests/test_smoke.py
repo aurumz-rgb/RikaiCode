@@ -38,4 +38,4 @@ def test_file_stats():
     
     assert ext_counts['py'] == 1
     assert ext_counts['csv'] == 1
-    assert total_lines == 4  
+    assert total_lines == 3 

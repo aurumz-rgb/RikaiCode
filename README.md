@@ -10,6 +10,7 @@ RikaiCode is a sophisticated, browser-based tool designed to turn complex codeba
 ![Streamlit](https://img.shields.io/badge/Powered%20by-Streamlit-orange)
 [![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20059448.svg?style=for-the-badge)](https://doi.org/10.5281/zenodo.20059448)
+[![CI](https://github.com/aurumz-rgb/RikaiCode/actions/workflows/ci.yml/badge.svg)](https://github.com/aurumz-rgb/RikaiCode/actions/workflows/ci.yml)
 
 ---
 
