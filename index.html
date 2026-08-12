@@ -3,303 +3,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RikaiCode</title>
-  <meta name="description" content="RikaiCode is an advanced open-source tool to flatten repositories into context-ready text, generate AI-driven synopses, grade repository health, and analyze code architecture.">
-  <meta name="keywords" content="RikaiCode, Repository Flattener, LLM Context Generator, AI Code Analysis, Repository Grader, Code Security, Open Source, Python, Streamlit, Aurumz">
-  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://img.shields.io">
+  <link rel="preconnect" href="https://zenodo.org">
+  <title>RikaiCode: Repository Flattener & AI Code Analysis Tool</title>
+  
+  <meta name="description" content="Flatten codebases into LLM context, generate AI code synopses, grade repository health, and scan for security vulnerabilities with RikaiCode. Free open-source tool.">
+  <meta name="keywords" content="RikaiCode, Repository Flattener, LLM Context Generator, AI Code Analysis, Repository Grader, Code Security, ChatGPT context, codebase summarizer, Open Source, Python, Streamlit, Aurumz">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="author" content="Aurumz">
   <meta name="copyright" content="© 2026 aurumz-rgb">
   <link rel="canonical" href="https://aurumz-rgb.github.io/RikaiCode/">
   
-
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <link rel="apple-touch-icon" href="assets/logo.png">
+  <link rel="icon" href="https://aurumz-rgb.github.io/RikaiCode/favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="https://aurumz-rgb.github.io/RikaiCode/assets/logo.png">
   
   <meta name="theme-color" content="#171717">
 
   <meta property="og:type" content="website">
-  <meta property="og:title" content="RikaiCode | Repository Flattener & AI Analysis">
+  <meta property="og:title" content="RikaiCode: Repository Flattener & AI Code Analysis">
   <meta property="og:description" content="Advanced tool to flatten repositories for LLM context, generate AI synopses, and grade code quality.">
   <meta property="og:url" content="https://aurumz-rgb.github.io/RikaiCode/">
   <meta property="og:site_name" content="RikaiCode">
-  <meta property="og:image" content="assets/logo.png">
+  <meta property="og:image" content="https://aurumz-rgb.github.io/RikaiCode/assets/logo.png">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="RikaiCode">
+  <meta name="twitter:title" content="RikaiCode: Repository Flattener & AI Code Analysis">
   <meta name="twitter:description" content="Advanced Repository Flattener, Context Generator & Intelligent Grader.">
+  <meta name="twitter:image" content="https://aurumz-rgb.github.io/RikaiCode/assets/logo.png">
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Inter', sans-serif;
-      line-height: 1.6;
-      color: #ededed;
-      background-color: #171717;
-      overflow-x: hidden;
-    }
-    
-    .header {
-      background-color: #171717;
-      color: #ededed;
-      padding: 80px 0 60px;
-      text-align: center;
-      border-bottom: 1px solid #333;
-    }
-    
-    .header-content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "RikaiCode",
+    "operatingSystem": "Web Browser",
+    "applicationCategory": "DeveloperApplication",
+    "description": "RikaiCode is a browser-based developer tool that transforms complex GitHub and GitLab repositories into structured, readable, and AI-ready intelligence.",
+    "url": "https://aurumz-rgb.github.io/RikaiCode/",
+    "creator": {
+      "@type": "Person",
+      "name": "Aurumz",
+      "url": "https://github.com/aurumz-rgb"
+    },
+    "license": "https://www.gnu.org/licenses/agpl-3.0"
+  }
+  </script>
 
-    .logo-container {
-      margin-bottom: 25px;
-    }
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does RikaiCode flatten a repository for LLM context?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "RikaiCode converts repositories into structured TXT, JSON, PDF, DOCX, and Markdown formats. It strips unnecessary binaries and formats the code perfectly to provide optimal context for LLMs like ChatGPT and Claude."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can RikaiCode detect security vulnerabilities in my code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, RikaiCode performs security heuristics to scan your codebase and detect potential vulnerabilities like exposed API keys or private credentials."
+        }
+      }
+    ]
+  }
+  </script>
 
-    .logo-img {
-      width: 180px;
-      height: auto;
-      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
-    }
-    
-    h1 {
-      font-size: 3.5rem;
-      margin-bottom: 15px;
-      font-weight: 700;
-    }
-    
-    h1 span {
-      color: #d3a0eb;
-    }
-    
-    .tagline {
-      font-size: 1.4rem;
-      margin-bottom: 30px;
-      color: #a0a0a0;
-    }
-    
-    .badges {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-top: 30px;
-      padding: 20px;
-      background: rgba(211, 160, 235, 0.05);
-      border-radius: 10px;
-      border: 1px solid #333;
-    }
-    
-    .badges img {
-      height: 20px;
-    }
-    
-    .main-content {
-      background-color: #171717;
-      padding: 40px 0;
-    }
-    
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    
-    .section {
-      margin-bottom: 50px;
-    }
-    
-    h2 {
-      font-size: 1.8rem;
-      color: #ededed;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 2px solid #d3a0eb;
-      display: inline-block;
-    }
-    
-    p {
-      margin-bottom: 20px;
-      color: #a0a0a0;
-      font-size: 1.1rem;
-    }
-    
-    .main-links {
-      text-align: center;
-      margin: 40px 0;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-    }
-    
-    .main-links a {
-      display: inline-block;
-      background-color: #d3a0eb;
-      color: #171717;
-      padding: 14px 28px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      font-size: 1rem;
-      border: 1px solid transparent;
-    }
-    
-    .main-links a:hover {
-      background-color: #b589c8;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(211, 160, 235, 0.3);
-    }
-    
-    .main-links a.secondary {
-      background-color: transparent;
-      color: #d3a0eb;
-      border: 1px solid #d3a0eb;
-    }
-    
-    .main-links a.secondary:hover {
-      background-color: rgba(211, 160, 235, 0.1);
-      color: #ededed;
-    }
-    
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin: 30px 0;
-    }
-    
-    .feature-card {
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 25px;
-      text-align: center;
-      background-color: #1e1e1e;
-      transition: all 0.3s ease;
-    }
-    
-    .feature-card:hover {
-      border-color: #d3a0eb;
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-    }
-    
-    .feature-card h4 {
-      color: #d3a0eb;
-      margin-bottom: 10px;
-      font-size: 1.2rem;
-    }
-    
-    .feature-card p {
-      color: #a0a0a0;
-      font-size: 0.95rem;
-      margin-bottom: 0;
-    }
-    
-    .info-box {
-      background-color: rgba(211, 160, 235, 0.05);
-      padding: 25px;
-      border-radius: 5px;
-      margin: 25px 0;
-      border-left: 4px solid #d3a0eb;
-      font-style: italic;
-      color: #ededed;
-    }
-
-    footer {
-      background-color: #1e1e1e;
-      color: #ededed;
-      padding: 30px 0;
-      margin-top: 0;
-      border-top: 1px solid #333;
-    }
-    
-    .footer-content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .footer-left {
-      text-align: left;
-      flex: 1;
-    }
-    
-    .footer-center {
-      text-align: center;
-      flex: 1;
-    }
-    
-    .footer-right {
-      text-align: right;
-      flex: 1;
-    }
-    
-    footer p {
-      color: #a0a0a0;
-      margin-bottom: 0;
-      font-size: 0.9rem;
-    }
-    
-    footer a {
-      color: #ededed;
-      text-decoration: none;
-      font-weight: 600;
-      transition: color 0.3s ease;
-    }
-    
-    footer a:hover {
-      color: #737373;
-    }
-    
-    .heart {
-      color: #ff4b4b;
-    }
-    
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 2.5rem;
-      }
-      
-      .tagline {
-        font-size: 1.1rem;
-      }
-      
-      .header {
-        padding: 50px 0;
-      }
-
-      .logo-img {
-        width: 100px;
-      }
-      
-      .footer-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 15px;
-      }
-      
-      .footer-left, .footer-center, .footer-right {
-        text-align: center;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <div class="header">
     <div class="header-content">
       <div class="logo-container">
-        <img src="assets/logo.png" alt="RikaiCode Logo" class="logo-img">
+        <img src="assets/logo.png" alt="RikaiCode Repository Flattener and AI Analysis Logo" class="logo-img">
       </div>
       <h1>Rikai<span>Code.</span></h1>
       <p class="tagline">Advanced Repository Flattener, Context Generator & Intelligent Grader</p>
@@ -312,7 +94,7 @@
         <a href="https://github.com/aurumz-rgb/RikaiCode/releases"><img src="https://img.shields.io/github/v/release/aurumz-rgb/RikaiCode" alt="Version"></a>
         <a href="https://github.com/aurumz-rgb/RikaiCode/commits/main"><img src="https://img.shields.io/github/last-commit/aurumz-rgb/RikaiCode" alt="Last Commit"></a>
         <a href="https://github.com/aurumz-rgb/RikaiCode/graphs/contributors"><img src="https://img.shields.io/github/contributors/aurumz-rgb/RikaiCode" alt="Contributors"></a>
-        <a href="https://github.com/aurumz-rgb/RikaiCode/actions/workflows/ci.yml"><img src="https://github.com/aurumz-rgb/RikaiCode/actions/workflows/ci.yml/badge.svg" alt="CI Status"></a>
+        <a href="https://github.com/aurumz-rgb/RikaiCode/actions/workflow/ci.yml"><img src="https://github.com/aurumz-rgb/RikaiCode/actions/workflow/ci.yml/badge.svg" alt="CI Status"></a>
       </div>
     </div>
   </div>
@@ -352,27 +134,27 @@
         <h2>Key Features</h2>
         <div class="features">
           <div class="feature-card">
-            <h4>⚡ Flattening</h4>
+            <h3>⚡ Flattening</h3>
             <p>Converts repo to TXT, JSON, PDF, DOCX & Markdown.</p>
           </div>
           <div class="feature-card">
-            <h4>🤖 AI Synopsis</h4>
+            <h3>🤖 AI Synopsis</h3>
             <p>Generates project summaries & architecture analysis.</p>
           </div>
           <div class="feature-card">
-            <h4>✏️ Grading</h4>
+            <h3>✏️ Grading</h3>
             <p>Rates repository health from A++ to C.</p>
           </div>
           <div class="feature-card">
-            <h4>🔒 Security</h4>
+            <h3>🔒 Security</h3>
             <p>Scans for hardcoded secrets & API keys.</p>
           </div>
           <div class="feature-card">
-            <h4>📦 Dependencies</h4>
+            <h3>📦 Dependencies</h3>
             <p>Detects tech stack & infrastructure tools.</p>
           </div>
           <div class="feature-card">
-            <h4>📈 Insights</h4>
+            <h3>📈 Insights</h3>
             <p>Analyzes commit activity & code metrics.</p>
           </div>
         </div>
