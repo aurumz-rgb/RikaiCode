@@ -104,6 +104,7 @@ elif input_method == "🌐 GitHub Repository URL":
     url = st.text_input("Enter Public GitHub URL", placeholder="https://github.com/user/repo", key="github_url_input")
     if st.button("Fetch Repository", key="fetch_github_btn"):
         if url:
+            print(f"\n[Rikai Code] 🔎 User searched GitHub URL: {url}\n", flush=True)
             st.session_state.files_data = {}
             st.session_state.repo_meta = {}
             st.session_state.pr_stats = {}
@@ -119,6 +120,7 @@ elif input_method == "🦊 GitLab Repository URL":
     url = st.text_input("Enter Public GitLab URL", placeholder="https://gitlab.com/user/repo", key="gitlab_url_input")
     if st.button("Fetch Repository", key="fetch_gitlab_btn"):
         if url:
+            print(f"\n[Rikai Code] 🔎 User searched GitLab URL: {url}\n", flush=True)
             st.session_state.files_data = {}
             st.session_state.repo_meta = {}
             st.session_state.pr_stats = {}
@@ -652,7 +654,7 @@ gc.collect()
 
 st.markdown("""
 <div class="footer-custom">
-    <div style="flex: 1; text-align: left;">Made with 🤍  by <strong>Aurumz</strong>. v1.0.0.</div>
+    <div style="flex: 1; text-align: left;"></div>
     <div style="flex: 1; text-align: center;">
         <a href="https://github.com/aurumz-rgb/RikaiCode" target="_blank" class="footer-link">© 2026 aurumz-rgb — AGPL 3.0 License</a>
     </div>

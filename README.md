@@ -80,36 +80,40 @@ Export your entire flattened codebase into a single file for LLM context. Suppor
 
 ##  How It Works: The Grading Logic
 
-RikaiCode uses a **100-point scoring system**. The grade is determined by summing points across five key categories. The system switches between **Remote Analysis** (for GitHub/GitLab) and **Static Analysis** (for local files).
+RikaiCode uses a **100-point scoring system** that prioritizes **quality, maintenance, and activity** over raw popularity numbers. The grading curves are designed to be forgiving, ensuring healthy, active repositories receive high marks. The system switches between **Remote Analysis** (for GitHub/GitLab) and **Static Analysis** (for local files).
 
 ### 🌐 Remote Repository Scoring (GitHub/GitLab)
 
 | Category | Weight | Criteria & Calculation |
 | :--- | :---: | :--- |
-| **Popularity** | **30 pts** | Based on Stars (0-20 pts) and Fork Ratio (0-10 pts). High stars indicate trust; a healthy fork ratio implies utility. |
-| **Activity** | **25 pts** | Measures Recency (0-15 pts) and Commit Frequency (0-10 pts). Recent commits score higher. |
-| **Maintenance** | **20 pts** | Analyzes Open Issues Ratio and PR/MR Merge Rate. Low open issues and high merge rates indicate active maintenance. |
-| **Community** | **15 pts** | Based on the number of Watchers. Higher watchers mean more community interest. |
+| **Maintenance** | **35 pts** | The biggest quality factor. Issue Health (15 pts) is very forgiving and only penalizes massive ignored backlogs. PR Health (20 pts) rewards healthy merge rates. |
+| **Activity** | **30 pts** | Recency (15 pts) uses a gentle decay curve based on the last push date. Commit Frequency (15 pts) rewards having a solid commit history. |
+| **Popularity** | **15 pts** | Logarithmic scaling for Stars (10 pts) and Forks (5 pts). Caps at lower thresholds so normal repos can still score high without needing 10,000+ stars. |
+| **Community** | **10 pts** | Based on the number of Watchers. |
 | **Stability** | **10 pts** | Penalizes archived repositories. Active projects get full points. |
 
 ### 📁 Static Code Scoring (Local Files/Uploads)
 
 | Category | Weight | Criteria & Calculation |
 | :--- | :---: | :--- |
-| **Documentation** | **30 pts** | Checks for README files (10 pts) and Comment Density (20 pts). Higher comment-to-code ratios score better. |
-| **Structure** | **30 pts** | Modularity (avg lines per file) and Organization (presence of entry points like `main.py` or `index.js`). |
-| **Best Practices** | **20 pts** | Presence of dependency files (15 pts) and `.gitignore` (5 pts). |
-| **Scale** | **10 pts** | Total lines of code. Larger, mature projects score slightly higher. |
-| **Stability** | **10 pts** | Based on file count. More files often imply a structured, multi-module project. |
+| **Documentation** | **25 pts** | Checks for README presence/size (15 pts) and Comment Density (10 pts). Uses very forgiving thresholds to reward basic documentation. |
+| **Structure** | **25 pts** | Modularity (15 pts) allows up to 400 avg lines/file before penalizing. Organization (10 pts) rewards entry points and folder structures. |
+| **Best Practices** | **25 pts** | Checks for dependency files (10 pts), `.gitignore` (5 pts), License (5 pts), and CI configs (5 pts). |
+| **Scale** | **15 pts** | Total lines of code. Larger, mature projects score slightly higher. |
+| **Stability** | **10 pts** | Based on file count. Multi-module projects score higher. |
 
 ### Grade Breakdown
 - **A++ (95+):** Exceptional quality, highly active, massive community trust.
 - **A+ (90-94):** Excellent project, strong metrics.
-- **A (80-89):** Great project, reliable.
-- **B+ (70-79):** Good, but might lack activity or popularity.
-- **B (60-69):** Fair quality.
-- **C+ (50-59):** Average, potential maintenance issues.
-- **C (<50):** Low score, use with caution.
+- **A (85-89):** Great project, reliable.
+- **A- (80-84):** Very good, solid project with minor gaps.
+- **B+ (75-79):** Good, generally healthy but room for improvement.
+- **B (70-74):** Above average, usable but verify specific metrics.
+- **B- (65-69):** Fair, functional with notable weaknesses.
+- **C+ (60-64):** Average, review maintenance carefully.
+- **C (50-59):** Below average, possible stagnation.
+- **D (40-49):** Weak, likely unmaintained.
+- **F (<40):** Poor, high risk; do not use without significant review.
 
 ---
 
@@ -269,3 +273,6 @@ Contributions are always welcome!
 ---
 
 <p align="center">Made with 🤍 by <strong>Aurumz</strong></p>
+
+
+

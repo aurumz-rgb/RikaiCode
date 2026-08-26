@@ -27,190 +27,217 @@ def get_file_stats(files_dict):
         total_size += len(content)
     return ext_counts, total_lines, total_size
 
+import math
+
 def calculate_repo_quality_score(meta, commits, pr_stats):
     """
-    Unified Grading Logic for GitHub/GitLab Metrics.
+    Quality-focused Grading Logic.
+    Shifts weight away from raw star/fork numbers towards maintenance, activity, and PR health.
     Returns (score, breakdown_dict)
     """
     score = 0
     breakdown = {}
-    
-    # 1. Popularity (30 pts)
+
+    # ---- 1. Popularity (15 pts)
     stars = meta.get('stars', 0)
     forks = meta.get('forks', 0)
     
-    # Stars Logic (20 pts)
-    if stars > 10000: star_pts = 20
-    elif stars > 1000: star_pts = 18
-    elif stars > 100: star_pts = 14
-    elif stars > 10: star_pts = 8
-    else: star_pts = 2
     
-    # Fork Logic (10 pts) - Fork Ratio
-    fork_ratio = forks / stars if stars > 0 else 0
-    if fork_ratio > 0.2: fork_pts = 10
-    elif fork_ratio > 0.1: fork_pts = 7
-    else: fork_pts = 3
+    star_pts = round(min(10, 10 * (math.log10(stars + 1) / math.log10(2000 + 1))), 2) if stars > 0 else 0
+  
+    fork_pts = round(min(5, 5 * (math.log10(forks + 1) / math.log10(200 + 1))), 2) if forks > 0 else 0
     
-    popularity_score = star_pts + fork_pts
+    popularity_score = round(star_pts + fork_pts, 2)
     score += popularity_score
-    breakdown['Popularity'] = f"{popularity_score}/30 (Star points: {star_pts}, Fork Ratio: {fork_pts})"
+    breakdown['Popularity'] = f"{popularity_score}/15 (Stars: {star_pts}, Forks: {fork_pts})"
 
-    # 2. Activity (25 pts)
+    # ---- 2. Activity (30 pts) 
+    recency_pts = 0.0
     last_commit_str = meta.get('pushed_at', None)
-    activity_score = 0
-    recency_pts = 0
+    days_diff = 999
     if last_commit_str:
         try:
-      
             clean_date = last_commit_str.replace('Z', '+00:00')
             last_date = datetime.fromisoformat(clean_date)
-      
             now = datetime.now(last_date.tzinfo)
             days_diff = (now - last_date).days
-            
-            if days_diff < 30: recency_pts = 15
-            elif days_diff < 180: recency_pts = 10
-            elif days_diff < 365: recency_pts = 5
-            else: recency_pts = 0
-            
-            activity_score += recency_pts
+           
+            recency_pts = round(15 * math.exp(-days_diff / 270), 2)
         except: pass
-    
-    # Commit Frequency (10 pts)
-    freq_pts = 0
-    if len(commits) > 50: freq_pts = 10
-    elif len(commits) > 10: freq_pts = 7
-    else: freq_pts = 3
-    
-    activity_score += freq_pts
+
+    # Commit frequency (15 pts) 
+    commit_count = len(commits)
+    if commit_count > 100: freq_pts = 15.0
+    elif commit_count > 50: freq_pts = 12.0
+    elif commit_count > 20: freq_pts = 9.0
+    elif commit_count > 5: freq_pts = 6.0
+    else: freq_pts = 3.0
+
+    activity_score = round(recency_pts + freq_pts, 2)
     score += activity_score
-    breakdown['Activity'] = f"{activity_score}/25 (Recency: {recency_pts}, Freq: {freq_pts})"
+    breakdown['Activity'] = f"{activity_score}/30 (Recency: {recency_pts} (last push {days_diff}d ago), Freq: {freq_pts})"
 
-    # 3. Maintenance (20 pts)
-    # Issues Heuristic
+    # ---- 3. Maintenance (35 pts) 
     open_issues = meta.get('open_issues', 0)
-    issue_ratio = open_issues / stars if stars > 0 else 0
+    stars_safe = max(stars, 1)
     
-    if issue_ratio < 0.05: maint_pts = 20
-    elif issue_ratio < 0.1: maint_pts = 15
-    elif issue_ratio < 0.2: maint_pts = 10
-    else: maint_pts = 5
-    
-    # Adjust based on PR Health
+    # Issue Health (15 pts) 
+    if open_issues == 0: issue_pts = 15.0
+    elif open_issues < 50: issue_pts = 13.0
+    elif open_issues < 200: issue_pts = 11.0
+    else:
+        issue_density = open_issues / stars_safe
+        if issue_density > 1.0: issue_pts = 6.0  
+        else: issue_pts = 9.0
+
+    # PR Health (20 pts) 
     pr_merge_rate = pr_stats.get('merge_rate', 0)
-    if pr_merge_rate > 0.8: maint_pts += 5 # Bonus for healthy PRs
-    elif pr_merge_rate < 0.2 and pr_stats.get('total_prs', 0) > 10: maint_pts -= 5 # Penalty for ignored PRs
-    
-    score += maint_pts
-    breakdown['Maintenance'] = f"{maint_pts}/20 (Issue & PR Health)"
+    total_prs = pr_stats.get('total_prs', 0)
+    if total_prs == 0:
+        pr_pts = 12.0  
+    elif pr_merge_rate > 0.6:
+        pr_pts = 20.0
+    elif pr_merge_rate > 0.3:
+        pr_pts = 16.0
+    else:
+        pr_pts = 8.0
 
-    # 4. Community (15 pts)
-    watchers = meta.get('watchers', 0) 
-    if watchers > 1000: comm_pts = 15
-    elif watchers > 100: comm_pts = 10
-    elif watchers > 10: comm_pts = 5
-    else: comm_pts = 2
-    
+    maint_score = round(issue_pts + pr_pts, 2)
+    score += maint_score
+    breakdown['Maintenance'] = f"{maint_score}/35 (Issue Health: {issue_pts}, PR Health: {pr_pts})"
+
+    # ---- 4. Community (10 pts) 
+    watchers = meta.get('watchers', 0)
+    comm_pts = round(min(10, 10 * (math.log10(watchers + 1) / math.log10(200 + 1))), 2) if watchers > 0 else 0
     score += comm_pts
-    breakdown['Community'] = f"{comm_pts}/15 (Watchers)"
+    breakdown['Community'] = f"{comm_pts}/10 (Watchers: {watchers})"
 
-    # 5. Stability (10 pts)
-    if meta.get('archived', False): stab_pts = 0
-    else: stab_pts = 10
-    
+    # ---- 5. Stability (10 pts) 
+    if meta.get('archived', False):
+        stab_pts = 0.0
+    else:
+        stab_pts = 10.0
     score += stab_pts
-    breakdown['Stability'] = f"{stab_pts}/10 (Active Status)"
+    breakdown['Stability'] = f"{stab_pts}/10 (Archived: {meta.get('archived', False)})"
 
-    return score, breakdown
+    final_score = round(min(100, max(0, score)), 2)
+    return final_score, breakdown
 
 def get_grade_from_score(score):
-    if score >= 95: return 'A++', "Exceptional quality, highly active, and massive community trust."
-    elif score >= 90: return 'A+', "Excellent project with strong metrics and maintenance."
-    elif score >= 80: return 'A', "Great project, reliable and well-maintained."
-    elif score >= 70: return 'B+', "Good project, but might lack in activity or popularity."
-    elif score >= 60: return 'B', "Fair quality, check specific metrics for details."
-    elif score >= 50: return 'C+', "Average project, potential maintenance or activity issues."
-    else: return 'C', "Low score, use with caution. May be inactive or unmaintained."
+   
+    if score >= 95:
+        return 'A++', "Exceptional - top-tier project with outstanding metrics across every dimension."
+    elif score >= 90:
+        return 'A+', "Excellent - strong, well-maintained, and trusted by the community."
+    elif score >= 85:
+        return 'A', "Great - reliable, active, and follows best practices."
+    elif score >= 80:
+        return 'A-', "Very good - solid project with minor gaps."
+    elif score >= 75:
+        return 'B+', "Good - generally healthy but room for improvement."
+    elif score >= 70:
+        return 'B', "Above average - usable but verify specific metrics."
+    elif score >= 65:
+        return 'B-', "Fair - functional with notable weaknesses."
+    elif score >= 60:
+        return 'C+', "Average - review maintenance and activity carefully."
+    elif score >= 50:
+        return 'C', "Below average - possible stagnation or quality concerns."
+    elif score >= 40:
+        return 'D', "Weak - likely unmaintained or poorly structured."
+    else:
+        return 'F', "Poor - high risk; do not use without significant review."
 
 def analyze_static_quality(files_dict, total_lines):
     """
-    Advanced Static Grading Logic (Unified with GitHub system).
+    Quality-focused Static Grading Logic.
+    Much more forgiving on file size and comments, rewards basic best practices heavily.
     Returns (score, breakdown_dict)
     """
     score = 0
     breakdown = {}
-    
-    # 1. Documentation (30 pts)
-    # README Check (10 pts)
-    has_readme = any('readme' in f.lower() for f in files_dict.keys())
-    readme_pts = 10 if has_readme else 0
-    
-    # Comment Ratio (20 pts)
+
+    # ---- 1. Documentation (25 pts) 
+    readme_pts = 0.0
+    readme_content = ""
+    for f in files_dict:
+        if 'readme' in f.lower():
+            readme_content = files_dict[f]
+            break
+            
+    if readme_content:
+        readme_pts = 10.0  
+        if len(readme_content) > 500: readme_pts = 12.0
+        if len(readme_content) > 2000: readme_pts = 15.0
+
+    # Comments (10 pts) 
     total_comments = 0
     for content in files_dict.values():
-
         total_comments += len(re.findall(r'#.*|//.*|/\*.*?\*/', content, re.DOTALL))
-    
     doc_ratio = total_comments / total_lines if total_lines > 0 else 0
-    if doc_ratio > 0.15: comment_pts = 20
-    elif doc_ratio > 0.05: comment_pts = 10
-    else: comment_pts = 0
     
-    doc_score = readme_pts + comment_pts
-    score += doc_score
-    breakdown['Documentation'] = f"{doc_score}/30 (Readme: {readme_pts}, Comments: {comment_pts})"
+    if doc_ratio > 0.05: comment_pts = 10.0
+    elif doc_ratio > 0.02: comment_pts = 7.0
+    elif doc_ratio > 0.0: comment_pts = 4.0
+    else: comment_pts = 0.0
 
-    # 2. Structure (30 pts)
-    # Modularity (Avg lines per file) - 15 pts
-    avg_lines = total_lines / len(files_dict) if files_dict else 0
-    if avg_lines < 150: mod_pts = 15
-    elif avg_lines < 300: mod_pts = 10
-    elif avg_lines < 600: mod_pts = 5
-    else: mod_pts = 0
+    doc_score = round(readme_pts + comment_pts, 2)
+    score += doc_score
+    breakdown['Documentation'] = f"{doc_score}/25 (Readme: {readme_pts}, Comments: {comment_pts})"
+
+    # ---- 2. Structure (25 pts) 
+    file_count = max(len(files_dict), 1)
+    avg_lines = total_lines / file_count
     
-    # Organization (Entry point & Folders) - 15 pts
+    
+    if avg_lines < 400: mod_pts = 15.0
+    elif avg_lines < 800: mod_pts = 10.0
+    elif avg_lines < 1500: mod_pts = 5.0
+    else: mod_pts = 2.0
+
+    # Organization (10 pts)
+    org_pts = 0.0
     has_entry = any('main' in f.lower() or 'app' in f.lower() or 'index' in f.lower() for f in files_dict.keys())
     has_folders = any('/' in f for f in files_dict.keys())
-    org_pts = 0
-    if has_entry: org_pts += 10
-    if has_folders: org_pts += 5
-    
-    struct_score = mod_pts + org_pts
+    if has_entry: org_pts += 5.0
+    if has_folders: org_pts += 5.0
+
+    struct_score = round(mod_pts + org_pts, 2)
     score += struct_score
-    breakdown['Structure'] = f"{struct_score}/30 (Modularity: {mod_pts}, Org: {org_pts})"
+    breakdown['Structure'] = f"{struct_score}/25 (Modularity: {mod_pts} (avg {avg_lines:.0f} L/file), Org: {org_pts})"
 
-    # 3. Best Practices (20 pts)
-    # Dependencies (15 pts)
-    has_deps = 'requirements.txt' in files_dict or 'package.json' in files_dict
-    dep_pts = 15 if has_deps else 0
-    
-    # Gitignore (5 pts)
+    # ---- 3. Best Practices (25 pts) 
+    dep_files = ['requirements.txt', 'package.json', 'Cargo.toml', 'go.mod', 'pom.xml', 'build.gradle', 'Gemfile', 'composer.json']
+    has_deps = any(d in files_dict for d in dep_files)
     has_gitignore = any('.gitignore' in f for f in files_dict.keys())
-    git_pts = 5 if has_gitignore else 0
-    
-    bp_score = dep_pts + git_pts
+    has_license = any('license' in f.lower() for f in files_dict.keys())
+    has_ci = any(k in f for f in files_dict.keys() for k in ['.github/workflows/', '.gitlab-ci.yml', 'Jenkinsfile', 'azure-pipelines.yml'])
+
+    bp_score = 0.0
+    if has_deps: bp_score += 10.0
+    if has_gitignore: bp_score += 5.0
+    if has_license: bp_score += 5.0
+    if has_ci: bp_score += 5.0
+    bp_score = round(bp_score, 2)
     score += bp_score
-    breakdown['Best Practices'] = f"{bp_score}/20 (Deps: {dep_pts}, Gitignore: {git_pts})"
+    breakdown['Best Practices'] = f"{bp_score}/25 (Deps: {has_deps}, Gitignore: {has_gitignore}, License: {has_license}, CI: {has_ci})"
 
-    # 4. Scale (10 pts)
-    if total_lines > 1000: scale_pts = 10
-    elif total_lines > 200: scale_pts = 5
-    else: scale_pts = 2
-    
+    # ---- 4. Scale (15 pts) 
+    if total_lines > 1000: scale_pts = 15.0
+    elif total_lines > 200: scale_pts = 10.0
+    else: scale_pts = 5.0
     score += scale_pts
-    breakdown['Scale'] = f"{scale_pts}/10 (Lines: {total_lines})"
+    breakdown['Scale'] = f"{scale_pts}/15 (Lines: {total_lines})"
 
-    # 5. Stability (10 pts)
-    stab_pts = 0
-    if len(files_dict) >= 5: stab_pts = 10
-    elif len(files_dict) > 1: stab_pts = 5
-    else: stab_pts = 2
-    
+    # ---- 5. Stability (10 pts) 
+    if len(files_dict) >= 5: stab_pts = 10.0
+    elif len(files_dict) >= 2: stab_pts = 7.0
+    else: stab_pts = 4.0
     score += stab_pts
     breakdown['Stability'] = f"{stab_pts}/10 (File Count: {len(files_dict)})"
 
-    return score, breakdown
+    final_score = round(min(100, max(0, score)), 2)
+    return final_score, breakdown
 
 def build_full_tree(files_dict):
     lines = ["PROJECT ARCHITECTURE", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"]
@@ -257,7 +284,7 @@ def scan_dependencies(files_dict):
     for f in py_files:
         matches = re.findall(r'^(?:import|from)\s+([a-zA-Z0-9_]+)', files_dict[f], re.MULTILINE)
         for m in matches:
-            if m not in ['os', 'sys', 're', 'json', 'time', 'math']: # Filter stdlib
+            if m not in ['os', 'sys', 're', 'json', 'time', 'math']: 
                 deps.add(f"🐍 {m}")
 
     return sorted(list(deps))
@@ -268,7 +295,7 @@ def extract_code_structure(files_dict):
    
     target_files = [f for f in files_dict if f.endswith(('.py', '.js', '.ts'))] 
     
-    for filename in target_files[:200]: # Limit to 200 files for performance
+    for filename in target_files[:200]: # Limit to 200 files
         content = files_dict[filename]
         
 
