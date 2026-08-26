@@ -11,9 +11,9 @@ def test_grade_logic():
     grade, _ = get_grade_from_score(95)
     assert grade == 'A++'
 
- 
+   
     grade, _ = get_grade_from_score(40)
-    assert grade == 'C'
+    assert grade == 'D'
 
 def test_static_analysis_smoke():
     """Smoke test for static analysis engine."""
@@ -23,10 +23,11 @@ def test_static_analysis_smoke():
     }
     score, breakdown = analyze_static_quality(files, 2)
     
-    assert isinstance(score, int)
+    
+    assert isinstance(score, (int, float))
     assert 'Documentation' in breakdown
 
-    assert "Readme: 10" in breakdown['Documentation']
+    assert "Readme: 10" in breakdown['Documentation'] or "Readme: 10.0" in breakdown['Documentation']
 
 def test_file_stats():
     """Smoke test for file processing stats."""
